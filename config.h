@@ -57,15 +57,18 @@
 // V_pv = readDC_mV × (220K + 1K) / 1K / 1000  =  adc_mV × 0.221
 #define PV_SCALE_V_PER_MV    0.2210f    // 221 / 1000 — trim after meter check
 
-// AC mains voltage (~240 V RMS, no DC bias in circuit)
-// Circuit: R13 (220K upper) + R8 (1K lower) — same 1/221 divider ratio.
-// Only the positive half-cycle reaches the ADC (no DC offset).
-// readRMS_mV() on a half-wave signal returns Vpeak_adc / 2, so:
-//   V_rms = readRMS_mV × 2 × 221 / (√2 × 1000) = readRMS_mV × 0.3126
-#define AC_SCALE_V_PER_MV    0.3126f    // includes half-wave √2 correction
+// AC mains voltage (~230 V RMS South Africa)
+// Circuit: R13 (220K upper) + R8 (1K lower) — 1/221 divider, D1 half-wave rectifier.
+// Theoretical formula: readRMS_mV × 2 × 221 / (√2 × 1000) = readRMS_mV × 0.3126
+// Empirical result: ADC non-linearity on ESP32-C3 SuperMini returns ~3.88× too high,
+// so the empirical scale is 0.3126 / 3.88 ≈ 0.0806.
+// ⚠ Trim AC_SCALE_V_PER_MV by measuring AC mains with a calibrated meter:
+//     new_scale = 0.0806 × (meter_reading_V / device_reading_V)
+#define AC_SCALE_V_PER_MV    0.0806f    // empirical (theoretical 0.3126 — see above)
 
-// Heater element voltage (same divider as AC mains)
-#define ELEM_SCALE_V_PER_MV  0.3126f    // same half-wave correction
+// Heater element voltage (same divider + D2 half-wave; only used in AC mode for logging).
+// In PV mode powerW is computed from pvVoltageV × currentA (see BetterGecko.ino).
+#define ELEM_SCALE_V_PER_MV  0.0806f    // same empirical correction as AC_SCALE
 
 // ACS712-20A  (powered at 5 V)
 // VIOUT → R11 (1K) series → GPIO0, R9 (1K) pull-down — effective ÷2 divider.

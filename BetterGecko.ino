@@ -76,17 +76,29 @@ void loop() {
   if (now - lastSensorMs >= SENSOR_MS) {
     lastSensorMs = now;
     sensorsRead(g_sensors);
-    energyUpdate(g_sensors.powerW);
+
+    // ── Power calculation (mode-aware) ───────────────────────────────────────
+    // In PV mode the SSR feeds DC solar voltage to the element.
+    // elemVoltageV uses an AC half-wave formula that gives wrong results for DC,
+    // so use pvVoltageV (plain DC divider, reads correctly) × currentA instead.
+    // In AC mode the relay feeds mains AC; elemVoltageV with AC_SCALE is correct.
     g_state = controlUpdate(g_sensors, g_cfg);
+    if (g_state == State::PV_ON) {
+      g_sensors.powerW = g_sensors.pvVoltageV * g_sensors.currentA;
+    }
+
+    energyUpdate(g_sensors.powerW);
     g_mode = g_cfg.mode;
 
     // Verbose serial print every second (comment out to reduce noise)
     float t = bestTempC(g_sensors);
-    Serial.printf("[loop] T=%.1f°C  PV=%.0fV  AC=%.0fV  P=%.0fW  "
-                  "kWh=%.3f  mode=%s  state=%s\n",
+    Serial.printf("[loop] T=%.1f°C  PV=%.0fV  AC=%.0fV  elem=%.0fV  "
+                  "I=%.2fA  P=%.0fW  kWh=%.3f  mode=%s  state=%s\n",
                   isnan(t) ? 0.0f : t,
                   g_sensors.pvVoltageV,
                   g_sensors.acVoltageV,
+                  g_sensors.elemVoltageV,
+                  g_sensors.currentA,
                   g_sensors.powerW,
                   energyGetKwhSession(),
                   modeStr(g_mode),
