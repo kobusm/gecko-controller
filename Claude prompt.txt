@@ -1,0 +1,31 @@
+I am designing a water heater (geyser) controller that can operate from AC or solar panels.
+
+The board uses an ESP32-C3 for control. The schematic is attached.
+Specifications:
+AC in 240V AC
+PV in (4 panels in series ~ 120V DC
+4kW element 13.7 ohm resistance
+Measures the PV DC voltage , AC in voltage, voltage on element, current through element with an ADC
+The controller can switch between AC and PV via a relay. The controller can also controller the PV on/off en PWM via a DC SSR 
+Temperature sensor (DS18B20 or thermocouple) to measure water temperature
+
+Operation: 
+The user sets an AC temperature set point. The controller will turn on the AC heating when the water temperature drops below that set point (say 50 C)
+The user also sets a PV set point. The controller will heat the water using PV to that temperature
+
+i want to implement a simple server on AWS and the controller can upload information to. The user can access the controller with a ios app via the server to get and change settings and download data
+
+Below are the settimngs and data reported by the controller
+Settings	Value 1	Value 2	Value 3	Value 4
+setMode	off	pvOnly	acOnly	PVAC
+getMode	off	pvOnly	acOnly	PVAC
+getState	off	pvOn 	acOn 	onTemp
+setTemprature	acThreshold	pvThreshold		
+getTemprature	acThreshold	pvThreshold	temperature	
+kwhRate				
+setTimers	timer1	timer2	timer3	timer4
+getTimers	timer1	timer2	timer3	timer4
+resetESP				
+getPower	current	voltage	pvVoltage	power
+getEnergy	kwhour	kwhDay	kwhWeek	kwhAll
+ 

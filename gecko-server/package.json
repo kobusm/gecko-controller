@@ -1,0 +1,13 @@
+{
+  "name": "gecko-server",
+  "version": "1.0.0",
+  "description": "BetterGecko water heater controller backend",
+  "main": "src/handler.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.140"
+  }
+}

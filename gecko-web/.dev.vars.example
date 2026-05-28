@@ -1,0 +1,5 @@
+# Copy this file to .dev.vars for local development with `wrangler pages dev`.
+# NEVER commit .dev.vars — it contains the real API key.
+
+API_BASE=https://u0sk00gsbi.execute-api.eu-west-1.amazonaws.com/prod
+API_KEY=YOUR_API_KEY_HERE

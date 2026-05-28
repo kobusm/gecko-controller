@@ -1,0 +1,39 @@
+# ── Firmware secrets ──────────────────────────────────────────────────────────
+# Contains WiFi SSID/password, API URL, and API key — never commit this.
+secrets.h
+
+# ── Arduino build artifacts ───────────────────────────────────────────────────
+build/
+*.bin
+*.elf
+*.map
+
+# ── Editor autosave ──────────────────────────────────────────────────────────
+\#auto_saved_files#
+*~
+.#*
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+__MACOSX/
+
+# ── KiCad ─────────────────────────────────────────────────────────────────────
+*-backups/
+*.kicad_sch-bak
+~*.kicad_sch.lck
+_autosave-*
+
+# ── gecko-server ──────────────────────────────────────────────────────────────
+gecko-server/node_modules/
+gecko-server/.aws-sam/
+
+# ── gecko-web ─────────────────────────────────────────────────────────────────
+gecko-web/.dev.vars
+gecko-web/node_modules/
+gecko-web/.wrangler/
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.csv
+*.xlsx
+*.pptx

@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: BetterGecko water heater controller backend
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        DEVICES_TABLE:   !Ref DevicesTable
+        TELEMETRY_TABLE: !Ref TelemetryTable
+        ENERGY_TABLE:    !Ref EnergyTable
+
+Resources:
+
+  # ── API Gateway ─────────────────────────────────────────────────────────────
+
+  GeckoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        ApiKeyRequired: true          # All routes require x-api-key header
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Quota:
+            Limit: 100000             # 100k calls/month on free tier
+            Period: MONTH
+          Throttle:
+            RateLimit: 10             # 10 req/s burst from ESP + app combined
+            BurstLimit: 20
+      Cors:
+        AllowMethods: "'GET,PUT,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,x-api-key'"
+        AllowOrigin:  "'*'"
+
+  # ── Lambda ──────────────────────────────────────────────────────────────────
+
+  GeckoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handler.handler
+      Description: BetterGecko device + iOS app API
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref DevicesTable }
+        - DynamoDBCrudPolicy: { TableName: !Ref TelemetryTable }
+        - DynamoDBCrudPolicy: { TableName: !Ref EnergyTable }
+      Events:
+        # Device → Server
+        PostTelemetry:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/telemetry
+            Method: POST
+
+        # iOS App ↔ Server
+        GetSettings:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/settings
+            Method: GET
+
+        PutSettings:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/settings
+            Method: PUT
+
+        GetState:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/state
+            Method: GET
+
+        GetPower:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/power
+            Method: GET
+
+        GetEnergy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/energy
+            Method: GET
+
+        GetHistory:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/history
+            Method: GET
+
+        PostReset:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GeckoApi
+            Path: /device/{deviceId}/reset
+            Method: POST
+
+  # ── DynamoDB Tables ─────────────────────────────────────────────────────────
+
+  DevicesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: gecko_devices
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: deviceId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: deviceId
+          KeyType: HASH
+
+  TelemetryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: gecko_telemetry
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: deviceId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: deviceId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true           # Records auto-expire after 90 days
+
+  EnergyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: gecko_energy
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S    # Format: "{deviceId}#{YYYY-MM-DD}"
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+# ── Outputs ─────────────────────────────────────────────────────────────────
+
+Outputs:
+  ApiUrl:
+    Description: REST API base URL — put this in the ESP32 sketch and iOS app
+    Value: !Sub "https://${GeckoApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  FunctionArn:
+    Value: !GetAtt GeckoFunction.Arn

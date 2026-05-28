@@ -1,0 +1,29 @@
+Already used:
+
+temperatures, pvVoltage, mpptVoltage, pvInPower, pvOutPower, acOutPower, state, timestamps
+Not yet shown — from the same endpoint:
+
+Field	What it is
+mcuTemps	Controller/board temperature (°C)
+rssi	WiFi signal strength (dBm)
+acOn	AC heating element on/off (0/1 per reading)
+pvOn	Solar panel active (0/1 per reading)
+kwhRate	Your electricity tariff (R4/kWh in your data)
+savingsWeek / savingsMonth / savingsYear	Rand value saved by solar (R104 this week)
+pvUsageWeek/Month/Year	Solar energy used (Wh)
+acUsageWeek/Month/Year	Grid energy used (Wh)
+ackWhWeek/Month/Year	AC energy in kWh
+pvInkWhWeek/Month/Year	PV input kWh
+pvOutkWhWeek/Month/Year	PV output kWh
+weeklyACUsage	Daily breakdown [{date, kWh}]
+Other known endpoints not yet used:
+
+Endpoint	What it does
+GET /app/hasControl	Whether your account has control rights
+POST /app/setTemperature	Set target temperature
+POST /app/setMode	Change operating mode
+POST /app/setHysteresis	Set temperature hysteresis
+POST /app/setTimers	Configure timer schedules
+POST /app/switchSafetyTimer	Enable/disable safety timer
+POST /app/resetESP	Reboot the WiFi module
+POST /app/resetMCU	Reboot the controller

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetterGecko</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────────────────── -->
+  <header>
+    <div class="header-left">
+      <h1>BetterGecko</h1>
+      <span class="device-id">gecko-001</span>
+    </div>
+    <div class="header-right">
+      <span id="online-badge" class="status-badge status-unknown">...</span>
+      <span id="last-seen" class="last-seen"></span>
+      <button id="refresh-btn" class="icon-btn" title="Refresh now">
+        <svg id="refresh-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+      <span id="refresh-time" class="refresh-time"></span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Status cards ──────────────────────────────────────────────────── -->
+    <section class="cards-grid">
+
+      <div class="card card-temp">
+        <div class="card-label">Water Temperature</div>
+        <div id="temp-value" class="value-big">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Heater State</div>
+        <span id="state-badge" class="badge badge-off">—</span>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Mode</div>
+        <div id="mode-value" class="value-med">—</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Power</div>
+        <div id="power-value" class="value-big">— W</div>
+        <div class="card-sub">
+          AC <span id="voltage-ac" class="dim">—</span> V &nbsp;·&nbsp;
+          PV <span id="voltage-pv" class="dim">—</span> V &nbsp;·&nbsp;
+          <span id="current-value" class="dim">—</span> A
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Energy cards ───────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="section-title">Energy</h2>
+      <div class="cards-grid">
+
+        <div class="card">
+          <div class="card-label">Session</div>
+          <div><span id="kwh-session" class="value-med">—</span> <span class="unit">kWh</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Today</div>
+          <div><span id="kwh-day" class="value-med">—</span> <span class="unit">kWh</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">This Week</div>
+          <div><span id="kwh-week" class="value-med">—</span> <span class="unit">kWh</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">All Time</div>
+          <div><span id="kwh-all" class="value-med">—</span> <span class="unit">kWh</span></div>
+        </div>
+
+        <div class="card" id="savings-card" style="display:none">
+          <div class="card-label">Estimated Savings</div>
+          <div id="savings-value" class="value-med savings">—</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── History chart ──────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="section-title">History — last 24 h</h2>
+      <div class="chart-wrap">
+        <canvas id="history-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- ── Settings ───────────────────────────────────────────────────────── -->
+    <section class="settings-section">
+      <div class="section-header">
+        <h2 class="section-title" style="margin:0">Settings</h2>
+        <button id="refresh-settings-btn" class="btn btn-ghost btn-sm">↻ Reload</button>
+      </div>
+
+      <!-- Mode -->
+      <div class="setting-group">
+        <label for="mode-select">Operating Mode</label>
+        <select id="mode-select" class="select">
+          <option value="off">Off — everything disabled</option>
+          <option value="pvOnly">PV Only — solar heating only</option>
+          <option value="acOnly">AC Only — mains heating only</option>
+          <option value="PVAC">PV + AC — solar preferred, mains as backup</option>
+        </select>
+      </div>
+
+      <!-- Thresholds -->
+      <div class="settings-row">
+        <div class="setting-group">
+          <label>AC Setpoint — heat until this temperature</label>
+          <div class="slider-row">
+            <input type="range" id="ac-threshold" min="30" max="85" step="0.5" class="slider">
+            <input type="number" id="ac-threshold-num" min="30" max="85" step="0.5" class="num-input">
+            <span class="unit">°C</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>PV Setpoint — heat with solar until this temperature</label>
+          <div class="slider-row">
+            <input type="range" id="pv-threshold" min="30" max="85" step="0.5" class="slider">
+            <input type="number" id="pv-threshold-num" min="30" max="85" step="0.5" class="num-input">
+            <span class="unit">°C</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- kWh rate -->
+      <div class="setting-group setting-group-narrow">
+        <label for="kwh-rate">Electricity Rate (for savings calculation)</label>
+        <div class="input-inline">
+          <span class="input-prefix">R</span>
+          <input type="number" id="kwh-rate" min="0" step="0.01" placeholder="0.00" class="num-input">
+          <span class="unit">/ kWh</span>
+        </div>
+      </div>
+
+      <!-- Timers -->
+      <div class="timers-section">
+        <h3>AC Heating Timers</h3>
+        <p class="hint">
+          AC heating is allowed only during active timer windows.
+          If all timers are disabled, AC heating runs any time the temperature is below the setpoint.
+        </p>
+
+        <div id="timers-container">
+          <!-- Dynamically generated by app.js -->
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button id="save-btn" class="btn btn-primary">Save Settings</button>
+        <button id="reset-btn" class="btn btn-danger">Reboot ESP32</button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Chart.js + date adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
