@@ -112,9 +112,9 @@ exports.getHistory = async (deviceId, query) => {
   const params = {
     TableName: TABLES.TELEMETRY,
     KeyConditionExpression: 'deviceId = :id AND #ts BETWEEN :from AND :to',
-    ExpressionAttributeNames:  { '#ts': 'timestamp', '#pwr': 'power' },
+    ExpressionAttributeNames:  { '#ts': 'timestamp', '#pwr': 'power', '#cur': 'current' },
     ExpressionAttributeValues: { ':id': deviceId, ':from': from, ':to': to },
-    ProjectionExpression: '#ts, temperature, current, voltage, pvVoltage, #pwr, kwhour',
+    ProjectionExpression: '#ts, temperature, #cur, voltage, pvVoltage, #pwr, kwhour',
     ScanIndexForward: true,
     Limit: limit,
   };
