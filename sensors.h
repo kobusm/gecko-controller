@@ -12,12 +12,11 @@ struct SensorData {
   float powerW;           // Calculated: mode-aware (see BetterGecko.ino)
   bool  tcFault;          // true if MAX31855 reports a fault
 
-  // Raw ADC counts (0–4095) — for calibration / scale-factor trimming.
-  // DC pins: average count.  AC/RMS pins: RMS of counts (no zero-offset).
-  uint16_t pvRaw;         // avg analogRead(PIN_PV_VOLTAGE)
-  uint16_t acRaw;         // RMS analogRead(PIN_AC_VOLTAGE)
-  uint16_t elemRaw;       // RMS analogRead(PIN_ELEM_VOLT)
-  uint16_t currentRaw;    // RMS analogRead(PIN_ACS712)
+  // Raw ADC readings (mV) — for calibration / scale-factor trimming
+  float pvRawMv;          // readDC_mV(PIN_PV_VOLTAGE)
+  float acRawMv;          // readRMS_mV(PIN_AC_VOLTAGE, 0)
+  float elemRawMv;        // readRMS_mV(PIN_ELEM_VOLT, 0)
+  float currentRawMv;     // readRMS_mV(PIN_ACS712, CURRENT_ZERO_MV)
 };
 
 // ─── Initialise sensors (call once in setup) ─────────────────────────────────
