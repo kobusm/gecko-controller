@@ -3,14 +3,10 @@
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <Adafruit_MAX31855.h>
 
 // ── Hardware objects ──────────────────────────────────────────────────────────
 static OneWire           oneWire(PIN_DS18B20);
 static DallasTemperature ds18b20(&oneWire);
-
-// Software SPI: Adafruit_MAX31855(CLK, CS, MISO)
-static Adafruit_MAX31855 thermocouple(PIN_MAX_SCK, PIN_MAX_CS, PIN_MAX_MISO);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -53,12 +49,6 @@ void sensorsBegin() {
   ds18b20.setWaitForConversion(false);// non-blocking; first result after ~1 s
   ds18b20.requestTemperatures();      // kick off first conversion
 
-#if 0   // MAX31855 temporarily disabled — using DS18B20 only
-  if (!thermocouple.begin()) {
-    Serial.println("[sensors] MAX31855 not found — check SPI wiring");
-  }
-#endif
-
   Serial.println("[sensors] Initialised");
 }
 
@@ -71,22 +61,6 @@ void sensorsRead(SensorData &s) {
     Serial.println("[sensors] DS18B20 disconnected");
   }
   ds18b20.requestTemperatures();    // start next conversion (ready in ~1 s)
-
-  // ── MAX31855 thermocouple (temporarily disabled — DS18B20 only) ─────────
-  s.tcTempC = NAN;
-  s.tcFault = false;
-#if 0
-  s.tcTempC = thermocouple.readCelsius();
-  s.tcFault = thermocouple.readError();     // non-zero = open/short fault
-  if (s.tcFault) {
-    uint8_t f = s.tcFault;
-    Serial.printf("[sensors] MAX31855 fault: %s%s%s\n",
-      (f & MAX31855_FAULT_OPEN)    ? "OPEN " : "",
-      (f & MAX31855_FAULT_SHORT_GND) ? "SHORT_GND " : "",
-      (f & MAX31855_FAULT_SHORT_VCC) ? "SHORT_VCC" : "");
-    s.tcTempC = NAN;
-  }
-#endif
 
   // ── PV string voltage (DC) ───────────────────────────────────────────────
   s.pvRawMv    = readDC_mV(PIN_PV_VOLTAGE);
@@ -114,7 +88,5 @@ void sensorsRead(SensorData &s) {
 }
 
 float bestTempC(const SensorData &s) {
-  if (!s.tcFault && !isnan(s.tcTempC)) return s.tcTempC;
-  if (!isnan(s.waterTempC))            return s.waterTempC;
-  return NAN;
+  return s.waterTempC;   // DS18B20 only; returns NAN if disconnected
 }
