@@ -13,9 +13,9 @@
 #define PIN_DS18B20     8   // GPIO8 → DQ
 
 // ACS712-20A current sensor
-// VIOUT → R11 (1K) series → GPIO0, R9 (1K) pull-down to GND
-// Effective ÷2 divider: GPIO0 = VIOUT × R9/(R11+R9) = VIOUT × 0.5
-#define PIN_ACS712      0   // GPIO0-A0  (ADC1_CH0)
+// VIOUT → R11 (1K) series → GPIO0, R9 (2K) pull-down to GND
+// Divider: GPIO0 = VIOUT × R9/(R11+R9) = VIOUT × 2/3 = VIOUT × 0.6563
+#define PIN_ACS712      5   // GPIO0-A0  (ADC1_CH0)
 
 // MAX31855 thermocouple amplifier — software SPI (read-only, no MOSI)
 // Adafruit_MAX31855(CLK, CS, MISO)
@@ -71,12 +71,12 @@
 #define ELEM_SCALE_V_PER_MV  0.0806f    // same empirical correction as AC_SCALE
 
 // ACS712-20A  (powered at 5 V)
-// VIOUT → R11 (1K) series → GPIO0, R9 (1K) pull-down — effective ÷2 divider.
-//   Zero-current VIOUT = 2500 mV → GPIO0 = 1250 mV
-//   Sensitivity = 100 mV/A  → at GPIO0 = 50 mV/A
-//   Calibrate CURRENT_ZERO_MV: read GPIO0 with element disconnected (no load).
-#define CURRENT_ZERO_MV      1250       // mV at 0 A  (adjust after no-load test)
-#define CURRENT_SENS_MV_A    50.0f      // mV per Amp
+// VIOUT → R11 (1K) series → GPIO0, R9 (2K) pull-down to GND.
+//   Divider ratio = 2K / (1K + 2K) = 2/3 = 0.6563
+//   Measured: zero-current VIOUT = 2560 mV → GPIO0 = 1680 mV
+//   Sensitivity = 100 mV/A at VIOUT → 100 × 0.6563 = 65.6 mV/A at GPIO0
+#define CURRENT_ZERO_MV      1680       // mV at 0 A  (measured)
+#define CURRENT_SENS_MV_A    65.625f    // mV per Amp (100 mV/A × 2/3 divider)
 
 // RMS sampling: 200 samples @ ~4 kHz ≈ 50 ms = 2.5 × 50 Hz cycles
 #define RMS_SAMPLES          200
