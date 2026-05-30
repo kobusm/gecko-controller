@@ -92,13 +92,14 @@ void loop() {
 
     // Verbose serial print every second (comment out to reduce noise)
     float t = bestTempC(g_sensors);
-    Serial.printf("[loop] T=%.1f°C  PV=%.0fV  AC=%.0fV  elem=%.0fV  "
-                  "I=%.2fA  P=%.0fW  kWh=%.3f  mode=%s  state=%s\n",
+    Serial.printf("[loop] T=%.1f°C  PV=%.0fV(%.0fmV)  AC=%.0fV(%.0fmV)"
+                  "  elem=%.0fV(%.0fmV)  I=%.2fA(%.0fmV)"
+                  "  P=%.0fW  kWh=%.3f  mode=%s  state=%s\n",
                   isnan(t) ? 0.0f : t,
-                  g_sensors.pvVoltageV,
-                  g_sensors.acVoltageV,
-                  g_sensors.elemVoltageV,
-                  g_sensors.currentA,
+                  g_sensors.pvVoltageV,   g_sensors.pvRawMv,
+                  g_sensors.acVoltageV,   g_sensors.acRawMv,
+                  g_sensors.elemVoltageV, g_sensors.elemRawMv,
+                  g_sensors.currentA,     g_sensors.currentRawMv,
                   g_sensors.powerW,
                   energyGetKwhSession(),
                   modeStr(g_mode),

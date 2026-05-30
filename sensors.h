@@ -9,8 +9,14 @@ struct SensorData {
   float acVoltageV;       // AC mains RMS voltage (V)
   float pvVoltageV;       // PV string DC voltage (V)
   float elemVoltageV;     // Heater element voltage (V)
-  float powerW;           // Calculated: elemVoltageV × currentA (W)
+  float powerW;           // Calculated: mode-aware (see BetterGecko.ino)
   bool  tcFault;          // true if MAX31855 reports a fault
+
+  // Raw ADC readings (mV) — for calibration / scale-factor trimming
+  float pvRawMv;          // readDC_mV(PIN_PV_VOLTAGE)
+  float acRawMv;          // readRMS_mV(PIN_AC_VOLTAGE, 0)
+  float elemRawMv;        // readRMS_mV(PIN_ELEM_VOLT, 0)
+  float currentRawMv;     // readRMS_mV(PIN_ACS712, CURRENT_ZERO_MV)
 };
 
 // ─── Initialise sensors (call once in setup) ─────────────────────────────────

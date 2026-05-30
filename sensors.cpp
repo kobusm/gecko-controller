@@ -89,27 +89,27 @@ void sensorsRead(SensorData &s) {
 #endif
 
   // ── PV string voltage (DC) ───────────────────────────────────────────────
-  float pvMv     = readDC_mV(PIN_PV_VOLTAGE);
-  s.pvVoltageV   = pvMv * PV_SCALE_V_PER_MV;
+  s.pvRawMv    = readDC_mV(PIN_PV_VOLTAGE);
+  s.pvVoltageV = s.pvRawMv * PV_SCALE_V_PER_MV;
 
   // ── AC mains voltage (RMS) ───────────────────────────────────────────────
   // D1 (1N4148WT) half-wave rectifier passes positive half-cycles only.
-  // ADC sees 0 V → +1534 mV peak; zeroMv = 0.
-  // AC_SCALE_V_PER_MV includes the half-wave √2 correction (× 0.3126).
-  float acRmsMv       = readRMS_mV(PIN_AC_VOLTAGE, 0);
-  s.acVoltageV        = acRmsMv * AC_SCALE_V_PER_MV;
+  // AC_SCALE_V_PER_MV is empirically corrected; see config.h for derivation.
+  s.acRawMv    = readRMS_mV(PIN_AC_VOLTAGE, 0);
+  s.acVoltageV = s.acRawMv * AC_SCALE_V_PER_MV;
 
   // ── Element voltage ──────────────────────────────────────────────────────
   // D2 (1N4148WT) half-wave rectifier — same circuit as AC mains.
-  float elemMv        = readRMS_mV(PIN_ELEM_VOLT, 0);
-  s.elemVoltageV      = elemMv * ELEM_SCALE_V_PER_MV;
+  // Note: only meaningful in AC mode; PV-mode power uses pvVoltageV instead.
+  s.elemRawMv    = readRMS_mV(PIN_ELEM_VOLT, 0);
+  s.elemVoltageV = s.elemRawMv * ELEM_SCALE_V_PER_MV;
 
   // ── ACS712-20A current (GPIO0 = ADC1_CH0) ───────────────────────────────
-  float iRmsMv = readRMS_mV(PIN_ACS712, CURRENT_ZERO_MV);
-  s.currentA   = iRmsMv / CURRENT_SENS_MV_A;
+  s.currentRawMv = readRMS_mV(PIN_ACS712, CURRENT_ZERO_MV);
+  s.currentA     = s.currentRawMv / CURRENT_SENS_MV_A;
   if (s.currentA < 0.0f) s.currentA = 0.0f;   // clamp noise below zero
 
-  // ── Calculated power ─────────────────────────────────────────────────────
+  // ── Calculated power (base; BetterGecko.ino overrides for PV mode) ───────
   s.powerW = s.elemVoltageV * s.currentA;
 }
 
