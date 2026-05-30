@@ -13,9 +13,9 @@
 #define PIN_DS18B20     8   // GPIO8 → DQ
 
 // ACS712-20A current sensor
-// VIOUT → R11 (1K) series → GPIO5, R9 (2K) pull-down to GND
-// Divider: GPIO5 = VIOUT × R9/(R11+R9) = VIOUT × 2/3 = VIOUT × 0.6563
-#define PIN_ACS712      5   // GPIO5-A5  (ADC2_CH0)
+// VIOUT → R11 (1K) series → GPIO4, R9 (2K) pull-down to GND
+// Divider: GPIO4 = VIOUT × R9/(R11+R9) = VIOUT × 2/3 = VIOUT × 0.6563
+#define PIN_ACS712      4   // GPIO4-A4  (ADC1_CH4)
 
 // 30 A SPDT relay — AC source switching
 // GPIO10 → R4 (470 Ω) → Q2 2N2222 base → collector drives relay coil
