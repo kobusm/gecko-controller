@@ -8,6 +8,10 @@
 static OneWire           oneWire(PIN_DS18B20);
 static DallasTemperature ds18b20(&oneWire);
 
+// Zero-current offset measured at startup (mV). Initialised from CURRENT_ZERO_MV
+// then refined by sensorsBegin() with no load attached.
+static int g_currentZeroMv = CURRENT_ZERO_MV;
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // Read RMS of a centred AC signal from an ADC pin.
@@ -49,6 +53,18 @@ void sensorsBegin() {
   ds18b20.setWaitForConversion(false);// non-blocking; first result after ~1 s
   ds18b20.requestTemperatures();      // kick off first conversion
 
+  // ── ACS712 zero-current calibration ─────────────────────────────────────
+  // Average 10 readings at startup (element must be disconnected / no load).
+  // Replaces the compile-time CURRENT_ZERO_MV constant.
+  uint32_t sum = 0;
+  for (int i = 0; i < 10; i++) {
+    sum += analogReadMilliVolts(PIN_ACS712);
+    delay(10);
+  }
+  g_currentZeroMv = (int)(sum / 10);
+  Serial.printf("[sensors] ACS712 zero offset = %d mV  (config default = %d mV)\n",
+                g_currentZeroMv, CURRENT_ZERO_MV);
+
   Serial.println("[sensors] Initialised");
 }
 
@@ -78,8 +94,8 @@ void sensorsRead(SensorData &s) {
   s.elemRawMv    = readRMS_mV(PIN_ELEM_VOLT, 0);
   s.elemVoltageV = s.elemRawMv * ELEM_SCALE_V_PER_MV;
 
-  // ── ACS712-20A current (GPIO0 = ADC1_CH0) ───────────────────────────────
-  s.currentRawMv = readRMS_mV(PIN_ACS712, CURRENT_ZERO_MV);
+  // ── ACS712-20A current ───────────────────────────────────────────────────
+  s.currentRawMv = readRMS_mV(PIN_ACS712, g_currentZeroMv);
   s.currentA     = s.currentRawMv / CURRENT_SENS_MV_A;
   if (s.currentA < 0.0f) s.currentA = 0.0f;   // clamp noise below zero
 
