@@ -65,11 +65,12 @@
 #define ELEM_SCALE_V_PER_MV  0.0806f    // same empirical correction as AC_SCALE
 
 // ACS712-20A  (powered at 5 V)
-// VIOUT → R11 (1K) series → GPIO0, R9 (2K) pull-down to GND.
+// VIOUT → R11 (1K) series → GPIO4, R9 (2K) pull-down to GND.
 //   Divider ratio = 2K / (1K + 2K) = 2/3 = 0.6563
-//   Measured: zero-current VIOUT = 2560 mV → GPIO0 = 1680 mV
-//   Sensitivity = 100 mV/A at VIOUT → 100 × 0.6563 = 65.6 mV/A at GPIO0
-#define CURRENT_ZERO_MV      1680       // mV at 0 A  (measured)
+//   Measured: zero-current VIOUT = 2560 mV → GPIO4 = 1680 mV
+//   Sensitivity = 100 mV/A at VIOUT → 100 × 0.6563 = 65.6 mV/A at GPIO4
+//   Note: sensorsBegin() auto-measures this at startup; value here is the fallback.
+#define CURRENT_ZERO_MV      1680       // mV at 0 A  (measured; overridden at runtime)
 #define CURRENT_SENS_MV_A    65.625f    // mV per Amp (100 mV/A × 2/3 divider)
 
 // RMS sampling: 200 samples @ ~4 kHz ≈ 50 ms = 2.5 × 50 Hz cycles
