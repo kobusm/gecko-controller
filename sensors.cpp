@@ -64,6 +64,7 @@ void sensorsBegin() {
   g_currentZeroMv = (int)(sum / 10);
   Serial.printf("[sensors] ACS712 zero offset = %d mV  (config default = %d mV)\n",
                 g_currentZeroMv, CURRENT_ZERO_MV);
+  Serial.flush();
 
   Serial.println("[sensors] Initialised");
 }

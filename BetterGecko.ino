@@ -6,7 +6,6 @@
 //  Required libraries (install via Arduino Library Manager):
 //    - OneWire             by Paul Stoffregen
 //    - DallasTemperature   by Miles Burton
-//    - Adafruit MAX31855   by Adafruit
 //    - ArduinoJson         by Benoit Blanchon
 // ═══════════════════════════════════════════════════════════════════════════════
 
